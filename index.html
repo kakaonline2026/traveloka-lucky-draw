@@ -5,22 +5,26 @@
     <title>Traveloka Lucky Draw - Du Xuân Trúng Lộc</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Be Vietnam Pro', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: radial-gradient(circle at center, #ff8c00 0%, #d32f2f 70%, #900000 100%);
-            height: 100vh; 
-            margin: 0; 
+            min-height: 100vh; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             justify-content: center; 
-            overflow: hidden; 
-            position: relative; 
+            overflow-x: hidden; 
+            position: relative;
+            padding: 20px;
         }
 
         /* ----- BACKGROUND ELEMENTS ----- */
         .floating-item {
-            position: absolute;
+            position: fixed;
             z-index: 0;
             pointer-events: none;
             user-select: none;
@@ -33,69 +37,85 @@
 
         /* ----- MÁY BAY HOẠT HÌNH GIF ----- */
         .flying-plane {
-            position: absolute;
+            position: fixed;
             z-index: 101; 
-            width: 150px; 
+            width: 120px; 
             height: auto;
             pointer-events: none; 
             animation: flyCounterClockwise 25s infinite linear;
         }
 
-        /* Đã sửa lỗi bay ngược: Đảo lại toàn bộ thông số scaleX */
         @keyframes flyCounterClockwise {
-            /* Nửa vòng trên: Bay từ Phải sang Trái -> Giữ nguyên hình gốc (đầu quay trái) */
             0%   { top: 10%; left: 50%; transform: scaleX(1); }
             12.5%{ top: 20%; left: 20%; transform: scaleX(1); }
             24.9%{ top: 50%; left: 5%; transform: scaleX(1); }
-            
-            /* Chạm viền trái -> Lật hình để đầu quay sang phải */
             25%  { top: 50%; left: 5%; transform: scaleX(-1); }
-            
-            /* Nửa vòng dưới: Bay từ Trái sang Phải -> Lật hình (đầu quay phải) */
             37.5%{ top: 80%; left: 20%; transform: scaleX(-1); }
             50%  { top: 85%; left: 50%; transform: scaleX(-1); }
             62.5%{ top: 80%; left: 80%; transform: scaleX(-1); }
             74.9%{ top: 50%; left: 90%; transform: scaleX(-1); }
-            
-            /* Chạm viền phải -> Trở về hình gốc để đầu quay sang trái */
             75%  { top: 50%; left: 90%; transform: scaleX(1); }
-            
-            /* Vòng lại lên trên: Bay tiếp từ Phải sang Trái */
             87.5%{ top: 20%; left: 80%; transform: scaleX(1); }
             100% { top: 10%; left: 50%; transform: scaleX(1); }
         }
 
+        /* ----- TRANSPARENCY BADGE ----- */
+        .transparency-badge {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 200;
+            background: rgba(0,0,0,0.7);
+            color: #4ade80;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .transparency-badge::before {
+            content: '🔒';
+        }
+
         /* ----- MAIN CONTAINER ----- */
         .container { 
-            background: rgba(255, 255, 255, 0.95); 
-            padding: 40px 80px; 
+            background: rgba(255, 255, 255, 0.97); 
+            padding: 36px 60px; 
             border-radius: 24px; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255, 215, 0, 0.3); 
             text-align: center; 
             position: relative;
             z-index: 10;
             backdrop-filter: blur(10px);
+            max-width: 650px;
+            width: 100%;
         }
         .container::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 8px;
+            height: 6px;
+            border-radius: 24px 24px 0 0;
             background: linear-gradient(to right, #ffd700, #ff8c00, #ffd700);
         }
         .brand-logo { 
-            max-width: 250px;
-            margin-bottom: 15px;
+            max-width: 220px;
+            margin-bottom: 10px;
         }
 
         /* ----- TEXT ANIMATION ----- */
         .campaign-title {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 900;
             color: #d32f2f;
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             animation: textGlow 2s infinite alternate;
+            letter-spacing: 2px;
         }
         @keyframes textGlow {
             0% { text-shadow: 0 0 5px #ffd700, 0 0 10px #ff8c00; }
@@ -104,37 +124,76 @@
 
         /* ----- UPLOAD AREA ----- */
         .upload-area {
-            margin: 15px 0;
-            padding: 15px;
+            margin: 12px 0;
+            padding: 14px;
             background: #fff8f5; 
             border: 2px dashed #ff8c00; 
             border-radius: 10px;
         }
-        input[type="file"] { font-size: 16px; color: #333; }
+        .upload-area label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="file"] { font-size: 14px; color: #333; margin-top: 6px; }
         #status {
             display: block;
-            margin-top: 10px;
-            font-weight: bold;
+            margin-top: 8px;
+            font-weight: 600;
+            font-size: 13px;
             color: #d32f2f;
+        }
+
+        /* ----- PRIZE SELECTOR ----- */
+        .prize-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 14px 0 8px;
+            flex-wrap: wrap;
+        }
+        .prize-selector label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #555;
+        }
+        .prize-selector input {
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #d32f2f;
+            width: 200px;
+            text-align: center;
+            outline: none;
+            background: #fffcf0;
+            transition: border-color 0.2s;
+        }
+        .prize-selector input:focus {
+            border-color: #ff8c00;
         }
 
         /* ----- RESULT BOX ----- */
         .result-box { 
-            font-size: 65px; 
-            font-weight: bold; 
+            font-size: 56px; 
+            font-weight: 800; 
             color: #d32f2f; 
-            margin: 25px 0; 
-            min-width: 450px; 
-            height: 100px; 
+            margin: 18px 0; 
+            min-width: 100%; 
+            height: 95px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            border: 5px solid #ffd700; 
+            border: 4px solid #ffd700; 
             border-radius: 15px; 
             background: #fffcf0; 
-            letter-spacing: 3px; 
+            letter-spacing: 2px; 
             box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.3);
             transition: all 0.2s ease;
+            word-break: break-all;
+            padding: 10px;
         }
         .spinning {
             animation: pulse 0.1s infinite alternate;
@@ -145,21 +204,34 @@
             100% { transform: scale(1.02); }
         }
 
-        /* ----- BUTTON ANIMATION ----- */
+        .remaining-count {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 14px;
+            font-weight: 600;
+        }
+        .remaining-count span {
+            color: #d32f2f;
+            font-size: 15px;
+        }
+
+        /* ----- BUTTON ----- */
         button { 
             background: linear-gradient(90deg, #ff8c00 0%, #ffd700 50%, #e65100 100%);
             background-size: 200% auto;
             color: white; 
             border: none; 
-            padding: 16px 45px; 
-            font-size: 22px; 
-            font-weight: bold; 
+            padding: 15px 40px; 
+            font-size: 20px; 
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-weight: 800; 
             border-radius: 50px; 
             cursor: pointer; 
             text-transform: uppercase;
             box-shadow: 0 6px 15px rgba(230, 81, 0, 0.4);
             animation: shimmer 3s infinite linear;
-            transition: transform 0.2s; 
+            transition: transform 0.2s;
+            letter-spacing: 1px;
         }
         @keyframes shimmer {
             0% { background-position: 0% center; }
@@ -174,27 +246,171 @@
             cursor: not-allowed; 
             animation: none;
         }
+
+        /* ----- HISTORY TABLE ----- */
+        .history-section {
+            margin-top: 24px;
+            z-index: 10;
+            position: relative;
+            max-width: 650px;
+            width: 100%;
+        }
+        .history-section h3 {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .history-table-wrap {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background: linear-gradient(90deg, #d32f2f, #ff8c00);
+        }
+        thead th {
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 12px 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody tr {
+            transition: background 0.15s;
+        }
+        tbody tr:nth-child(even) {
+            background: #fff8f5;
+        }
+        tbody tr:hover {
+            background: #fff0e0;
+        }
+        tbody td {
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #f0e0d0;
+        }
+        tbody td:first-child {
+            text-align: center;
+            color: #ff8c00;
+            font-weight: 800;
+        }
+        tbody td:nth-child(2) {
+            color: #d32f2f;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .empty-history {
+            padding: 24px;
+            color: #aaa;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        /* ----- EXPORT BUTTON ----- */
+        .export-btn {
+            margin-top: 12px;
+            background: linear-gradient(90deg, #1a7a3a, #2ecc71);
+            background-size: 200% auto;
+            padding: 10px 28px;
+            font-size: 14px;
+            border-radius: 30px;
+            display: none;
+        }
+        .export-btn:disabled {
+            background: #ccc;
+        }
+
+        /* ----- ALGO INFO ----- */
+        .algo-info {
+            margin-top: 14px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
     <img src="https://ugokawaii.com/wp-content/uploads/2023/04/plane-300x300.gif" alt="Flying Cartoon Plane" class="flying-plane">
 
+    <div class="transparency-badge">Crypto-Secure Random</div>
+
     <div class="container">
         <img src="https://ik.imagekit.io/tvlk/blog/2025/05/Traveloka_Primary_Logo-1.webp?tr=q-70,c-at_max,w-500,h-250,dpr-2" alt="Traveloka" class="brand-logo">
-        <div class="campaign-title">DU XUÂN TRÚNG LỘC</div>
+        <div class="campaign-title">🎋 Du Xuân Trúng Lộc 🎋</div>
         
         <div class="upload-area">
-            <label>Tải danh sách ID (.txt hoặc .csv): </label>
+            <label>📂 Tải danh sách Booking ID (.txt hoặc .csv):</label><br>
             <input type="file" id="fileInput" accept=".txt, .csv">
             <span id="status">Vui lòng tải file danh sách lên để bắt đầu!</span>
         </div>
 
+        <div class="prize-selector">
+            <label>🏆 Tên giải:</label>
+            <input type="text" id="prizeName" placeholder="VD: Giải Nhất" value="Giải Đặc Biệt">
+        </div>
+
         <div class="result-box" id="result">READY</div>
-        <button id="spinBtn" onclick="startSpin()" disabled>QUAY SỐ NGAY</button>
+        <div class="remaining-count" id="remainingCount">Còn lại: <span>—</span> ID trong danh sách</div>
+        <button id="spinBtn" onclick="startSpin()" disabled>🎰 QUAY SỐ NGAY</button>
+    </div>
+
+    <!-- HISTORY SECTION -->
+    <div class="history-section">
+        <h3>📋 Lịch Sử Kết Quả</h3>
+        <div class="history-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:60px">#</th>
+                        <th>Booking ID Trúng Giải</th>
+                        <th>Giải Thưởng</th>
+                        <th style="width:90px">Thời Gian</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr><td colspan="4" class="empty-history">Chưa có kết quả nào. Hãy bắt đầu quay số!</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <button class="export-btn" id="exportBtn" onclick="exportResults()">📥 Xuất Kết Quả (CSV)</button>
+    </div>
+
+    <div class="algo-info">
+        Thuật toán: <strong>crypto.getRandomValues()</strong> — Cryptographically Secure PRNG<br>
+        Mỗi ID chỉ trúng 1 lần — tự động loại khỏi danh sách sau khi trúng giải.
     </div>
 
     <script>
-        // --- ÂM THANH (TẠO TRỰC TIẾP BẰNG CODE) ---
+        // ===================================================
+        // CRYPTO-SECURE RANDOM: Thay thế Math.random()
+        // ===================================================
+        function secureRandomIndex(max) {
+            // Sử dụng crypto.getRandomValues() — tiêu chuẩn bảo mật cao
+            const array = new Uint32Array(1);
+            crypto.getRandomValues(array);
+            return array[0] % max;
+        }
+
+        // ===================================================
+        // ÂM THANH (TẠO TRỰC TIẾP BẰNG CODE)
+        // ===================================================
         let audioCtx;
 
         function initAudio() {
@@ -213,14 +429,11 @@
                 let gainNode = audioCtx.createGain();
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                
                 osc.type = 'square'; 
                 osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
                 osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                
                 gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.05);
             } catch (e) {}
@@ -233,29 +446,27 @@
                 let gainNode = audioCtx.createGain();
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
-                
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
                 osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.1); 
-                
                 gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); 
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); 
-                
                 osc.start();
                 osc.stop(audioCtx.currentTime + 1.5);
             } catch (e) {}
         }
 
-
-        // --- LOGIC GIAO DIỆN & QUAY SỐ ---
+        // ===================================================
+        // GIAO DIỆN & LOGIC
+        // ===================================================
         function createFloatingElements() {
-            const symbols = ['🌼', '🌸', '🪙', '✨'];
-            for (let i = 0; i < 40; i++) {
+            const symbols = ['🌼', '🌸', '🪙', '✨', '🎋'];
+            for (let i = 0; i < 35; i++) {
                 let el = document.createElement('div');
                 el.className = 'floating-item';
                 el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
                 el.style.left = Math.random() * 100 + 'vw';
-                el.style.fontSize = `${Math.random() * 20 + 15}px`;
+                el.style.fontSize = `${Math.random() * 18 + 14}px`;
                 el.style.animation = `fall ${Math.random() * 6 + 4}s linear infinite`;
                 el.style.animationDelay = `${Math.random() * 5}s`;
                 document.body.appendChild(el);
@@ -263,9 +474,16 @@
         }
         window.onload = createFloatingElements;
 
-        let idList = []; 
+        let idList = [];          // Danh sách ID còn lại (chưa trúng)
+        let winners = [];         // Lịch sử người trúng giải
         let isSpinning = false;
 
+        function updateRemainingCount() {
+            const el = document.getElementById('remainingCount');
+            el.innerHTML = `Còn lại: <span>${idList.length.toLocaleString('vi-VN')}</span> ID trong danh sách`;
+        }
+
+        // --- FILE UPLOAD ---
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -282,6 +500,7 @@
                     statusEl.innerText = `✔️ Đã tải thành công ${idList.length.toLocaleString('vi-VN')} Booking ID!`;
                     statusEl.style.color = "green";
                     btn.disabled = false;
+                    updateRemainingCount();
                 } else {
                     statusEl.innerText = "❌ File trống, vui lòng kiểm tra lại!";
                     statusEl.style.color = "red";
@@ -291,17 +510,25 @@
             reader.readAsText(file);
         });
 
+        // ===================================================
+        // QUAY SỐ — CRYPTO SECURE
+        // ===================================================
         function startSpin() {
             if (isSpinning || idList.length === 0) return;
+
+            if (idList.length === 0) {
+                alert('Đã hết ID trong danh sách! Tất cả đã trúng giải.');
+                return;
+            }
+
             isSpinning = true;
-            
             initAudio();
 
             const btn = document.getElementById('spinBtn');
             const resultBox = document.getElementById('result');
             
             btn.disabled = true;
-            btn.innerText = "ĐANG TÌM CHỦ NHÂN...";
+            btn.innerText = "⏳ ĐANG TÌM CHỦ NHÂN...";
             resultBox.classList.add('spinning');
 
             let duration = 3000; 
@@ -309,7 +536,8 @@
             let elapsed = 0;
 
             const interval = setInterval(() => {
-                let randomIndex = Math.floor(Math.random() * idList.length);
+                // Hiệu ứng quay: dùng crypto random
+                let randomIndex = secureRandomIndex(idList.length);
                 resultBox.innerText = idList[randomIndex];
                 elapsed += intervalTime;
                 
@@ -318,9 +546,11 @@
                 if (elapsed >= duration) {
                     clearInterval(interval);
                     
-                    let finalIndex = Math.floor(Math.random() * idList.length);
-                    resultBox.innerText = idList[finalIndex];
+                    // KẾT QUẢ CUỐI: Chọn bằng crypto random
+                    let finalIndex = secureRandomIndex(idList.length);
+                    let winnerId = idList[finalIndex];
                     
+                    resultBox.innerText = winnerId;
                     resultBox.classList.remove('spinning');
                     resultBox.style.color = "#d32f2f";
                     resultBox.style.transform = "scale(1.15)";
@@ -328,14 +558,87 @@
                     
                     playWinSound();
                     triggerConfetti();
+
+                    // LOẠI ID TRÚNG GIẢI khỏi danh sách
+                    idList.splice(finalIndex, 1);
+                    updateRemainingCount();
+
+                    // GHI LỊCH SỬ
+                    const prizeName = document.getElementById('prizeName').value.trim() || `Giải #${winners.length + 1}`;
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                     
-                    btn.disabled = false;
-                    btn.innerText = "QUAY TIẾP GIẢI SAU";
+                    winners.push({
+                        index: winners.length + 1,
+                        id: winnerId,
+                        prize: prizeName,
+                        time: timeStr,
+                        date: now.toLocaleDateString('vi-VN')
+                    });
+                    
+                    renderHistory();
+
+                    // Cập nhật trạng thái nút
+                    if (idList.length === 0) {
+                        btn.disabled = true;
+                        btn.innerText = "🎉 ĐÃ QUAY HẾT!";
+                    } else {
+                        btn.disabled = false;
+                        btn.innerText = "🎰 QUAY TIẾP GIẢI SAU";
+                    }
                     isSpinning = false;
                 }
             }, intervalTime);
         }
 
+        // ===================================================
+        // BẢNG LỊCH SỬ
+        // ===================================================
+        function renderHistory() {
+            const tbody = document.getElementById('historyBody');
+            if (winners.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-history">Chưa có kết quả nào.</td></tr>';
+                return;
+            }
+
+            // Hiển thị mới nhất ở trên
+            tbody.innerHTML = winners.slice().reverse().map(w => `
+                <tr>
+                    <td>${w.index}</td>
+                    <td>${w.id}</td>
+                    <td>${w.prize}</td>
+                    <td>${w.time}</td>
+                </tr>
+            `).join('');
+
+            // Hiện nút export
+            document.getElementById('exportBtn').style.display = 'inline-block';
+        }
+
+        // ===================================================
+        // XUẤT KẾT QUẢ CSV
+        // ===================================================
+        function exportResults() {
+            if (winners.length === 0) return;
+
+            const BOM = '\uFEFF'; // Hỗ trợ tiếng Việt khi mở bằng Excel
+            let csv = BOM + 'STT,Booking ID,Giải Thưởng,Thời Gian,Ngày\n';
+            winners.forEach(w => {
+                csv += `${w.index},"${w.id}","${w.prize}",${w.time},${w.date}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `KetQua_LuckyDraw_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ===================================================
+        // CONFETTI
+        // ===================================================
         function triggerConfetti() {
             confetti({ particleCount: 250, spread: 160, origin: { y: 0.6 }, colors: ['#ff0000', '#ffd700', '#ff8c00', '#ffffff'], zIndex: 100 });
         }
