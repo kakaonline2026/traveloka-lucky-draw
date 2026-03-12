@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Traveloka Lucky Draw - Du Xuân Trúng Lộc</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: radial-gradient(circle at center, #ff8c00 0%, #d32f2f 70%, #900000 100%);
+            height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            position: relative; 
+        }
+
+        /* ----- BACKGROUND ELEMENTS ----- */
+        .floating-item {
+            position: absolute;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            opacity: 0.8;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* ----- MÁY BAY HOẠT HÌNH GIF ----- */
+        .flying-plane {
+            position: absolute;
+            z-index: 101; 
+            width: 150px; 
+            height: auto;
+            pointer-events: none; 
+            animation: flyCounterClockwise 25s infinite linear;
+        }
+
+        /* Đã sửa lỗi bay ngược: Đảo lại toàn bộ thông số scaleX */
+        @keyframes flyCounterClockwise {
+            /* Nửa vòng trên: Bay từ Phải sang Trái -> Giữ nguyên hình gốc (đầu quay trái) */
+            0%   { top: 10%; left: 50%; transform: scaleX(1); }
+            12.5%{ top: 20%; left: 20%; transform: scaleX(1); }
+            24.9%{ top: 50%; left: 5%; transform: scaleX(1); }
+            
+            /* Chạm viền trái -> Lật hình để đầu quay sang phải */
+            25%  { top: 50%; left: 5%; transform: scaleX(-1); }
+            
+            /* Nửa vòng dưới: Bay từ Trái sang Phải -> Lật hình (đầu quay phải) */
+            37.5%{ top: 80%; left: 20%; transform: scaleX(-1); }
+            50%  { top: 85%; left: 50%; transform: scaleX(-1); }
+            62.5%{ top: 80%; left: 80%; transform: scaleX(-1); }
+            74.9%{ top: 50%; left: 90%; transform: scaleX(-1); }
+            
+            /* Chạm viền phải -> Trở về hình gốc để đầu quay sang trái */
+            75%  { top: 50%; left: 90%; transform: scaleX(1); }
+            
+            /* Vòng lại lên trên: Bay tiếp từ Phải sang Trái */
+            87.5%{ top: 20%; left: 80%; transform: scaleX(1); }
+            100% { top: 10%; left: 50%; transform: scaleX(1); }
+        }
+
+        /* ----- MAIN CONTAINER ----- */
+        .container { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 40px 80px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255, 215, 0, 0.3); 
+            text-align: center; 
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 8px;
+            background: linear-gradient(to right, #ffd700, #ff8c00, #ffd700);
+        }
+        .brand-logo { 
+            max-width: 250px;
+            margin-bottom: 15px;
+        }
+
+        /* ----- TEXT ANIMATION ----- */
+        .campaign-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #d32f2f;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            animation: textGlow 2s infinite alternate;
+        }
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px #ffd700, 0 0 10px #ff8c00; }
+            100% { text-shadow: 0 0 15px #ffd700, 0 0 25px #ff8c00, 0 0 35px #ff0000; }
+        }
+
+        /* ----- UPLOAD AREA ----- */
+        .upload-area {
+            margin: 15px 0;
+            padding: 15px;
+            background: #fff8f5; 
+            border: 2px dashed #ff8c00; 
+            border-radius: 10px;
+        }
+        input[type="file"] { font-size: 16px; color: #333; }
+        #status {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
+        /* ----- RESULT BOX ----- */
+        .result-box { 
+            font-size: 65px; 
+            font-weight: bold; 
+            color: #d32f2f; 
+            margin: 25px 0; 
+            min-width: 450px; 
+            height: 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 5px solid #ffd700; 
+            border-radius: 15px; 
+            background: #fffcf0; 
+            letter-spacing: 3px; 
+            box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        .spinning {
+            animation: pulse 0.1s infinite alternate;
+            color: #ff8c00 !important;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.02); }
+        }
+
+        /* ----- BUTTON ANIMATION ----- */
+        button { 
+            background: linear-gradient(90deg, #ff8c00 0%, #ffd700 50%, #e65100 100%);
+            background-size: 200% auto;
+            color: white; 
+            border: none; 
+            padding: 16px 45px; 
+            font-size: 22px; 
+            font-weight: bold; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            text-transform: uppercase;
+            box-shadow: 0 6px 15px rgba(230, 81, 0, 0.4);
+            animation: shimmer 3s infinite linear;
+            transition: transform 0.2s; 
+        }
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: -200% center; }
+        }
+        button:hover:not(:disabled) { 
+            transform: translateY(-3px) scale(1.05); 
+            box-shadow: 0 10px 20px rgba(230, 81, 0, 0.6); 
+        }
+        button:disabled { 
+            background: #cccccc; 
+            cursor: not-allowed; 
+            animation: none;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://ugokawaii.com/wp-content/uploads/2023/04/plane-300x300.gif" alt="Flying Cartoon Plane" class="flying-plane">
+
+    <div class="container">
+        <img src="https://ik.imagekit.io/tvlk/blog/2025/05/Traveloka_Primary_Logo-1.webp?tr=q-70,c-at_max,w-500,h-250,dpr-2" alt="Traveloka" class="brand-logo">
+        <div class="campaign-title">DU XUÂN TRÚNG LỘC</div>
+        
+        <div class="upload-area">
+            <label>Tải danh sách ID (.txt hoặc .csv): </label>
+            <input type="file" id="fileInput" accept=".txt, .csv">
+            <span id="status">Vui lòng tải file danh sách lên để bắt đầu!</span>
+        </div>
+
+        <div class="result-box" id="result">READY</div>
+        <button id="spinBtn" onclick="startSpin()" disabled>QUAY SỐ NGAY</button>
+    </div>
+
+    <script>
+        // --- ÂM THANH (TẠO TRỰC TIẾP BẰNG CODE) ---
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTick() {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.type = 'square'; 
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {}
+        }
+
+        function playWinSound() {
+            if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.1); 
+                
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); 
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
+            } catch (e) {}
+        }
+
+
+        // --- LOGIC GIAO DIỆN & QUAY SỐ ---
+        function createFloatingElements() {
+            const symbols = ['🌼', '🌸', '🪙', '✨'];
+            for (let i = 0; i < 40; i++) {
+                let el = document.createElement('div');
+                el.className = 'floating-item';
+                el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.fontSize = `${Math.random() * 20 + 15}px`;
+                el.style.animation = `fall ${Math.random() * 6 + 4}s linear infinite`;
+                el.style.animationDelay = `${Math.random() * 5}s`;
+                document.body.appendChild(el);
+            }
+        }
+        window.onload = createFloatingElements;
+
+        let idList = []; 
+        let isSpinning = false;
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const contents = e.target.result;
+                idList = contents.split(/\r?\n/).filter(line => line.trim() !== '');
+                
+                const statusEl = document.getElementById('status');
+                const btn = document.getElementById('spinBtn');
+
+                if (idList.length > 0) {
+                    statusEl.innerText = `✔️ Đã tải thành công ${idList.length.toLocaleString('vi-VN')} Booking ID!`;
+                    statusEl.style.color = "green";
+                    btn.disabled = false;
+                } else {
+                    statusEl.innerText = "❌ File trống, vui lòng kiểm tra lại!";
+                    statusEl.style.color = "red";
+                    btn.disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        function startSpin() {
+            if (isSpinning || idList.length === 0) return;
+            isSpinning = true;
+            
+            initAudio();
+
+            const btn = document.getElementById('spinBtn');
+            const resultBox = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.innerText = "ĐANG TÌM CHỦ NHÂN...";
+            resultBox.classList.add('spinning');
+
+            let duration = 3000; 
+            let intervalTime = 40; 
+            let elapsed = 0;
+
+            const interval = setInterval(() => {
+                let randomIndex = Math.floor(Math.random() * idList.length);
+                resultBox.innerText = idList[randomIndex];
+                elapsed += intervalTime;
+                
+                playTick();
+
+                if (elapsed >= duration) {
+                    clearInterval(interval);
+                    
+                    let finalIndex = Math.floor(Math.random() * idList.length);
+                    resultBox.innerText = idList[finalIndex];
+                    
+                    resultBox.classList.remove('spinning');
+                    resultBox.style.color = "#d32f2f";
+                    resultBox.style.transform = "scale(1.15)";
+                    setTimeout(() => resultBox.style.transform = "scale(1)", 400);
+                    
+                    playWinSound();
+                    triggerConfetti();
+                    
+                    btn.disabled = false;
+                    btn.innerText = "QUAY TIẾP GIẢI SAU";
+                    isSpinning = false;
+                }
+            }, intervalTime);
+        }
+
+        function triggerConfetti() {
+            confetti({ particleCount: 250, spread: 160, origin: { y: 0.6 }, colors: ['#ff0000', '#ffd700', '#ff8c00', '#ffffff'], zIndex: 100 });
+        }
+    </script>
+</body>
+</html>
